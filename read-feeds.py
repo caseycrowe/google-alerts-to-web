@@ -30,19 +30,22 @@ runTime = str(time.strftime('%m-%d-%Y %H:%M')) # Capture the date/time to string
 currentDT = datetime.datetime.now()
 cleanDate = currentDT.strftime("%Y-%m-%d %H:%M:%S")
  
-# Strip annoying <b>,</b>, and other annoying characters in titles and content
-# There is a better way to do this, but I've not dug in and written it yet
+# Strip annoying <b></b> which gets added by Google
+# Then swap out the emdash, left double quote, and right double quote which crashes dedupe later
+# Then remove all extended Unicode characters that show up for some reason
 for post in posts:
   post.title = re.sub('<b>', '', post.title)
   post.title = re.sub('</b>', '', post.title)
   post.title = re.sub('\u2014', '-', post.title) # emdash
   post.title = re.sub('\u201c', '&quot;', post.title) # left double quote
   post.title = re.sub('\u201d', '&quot;', post.title) # right double quote
+  post.title = re.sub('[^\x00-\x7F]+', '', post.title) # strip out extended unicode characters
   post.content[0].value = re.sub('<b>', '', post.content[0].value)
   post.content[0].value = re.sub('</b>', '', post.content[0].value)
   post.content[0].value = re.sub('\u2014', '-', post.content[0].value) # emdash
   post.content[0].value = re.sub('\u201c', '&quot;', post.content[0].value) # left double quote
   post.content[0].value = re.sub('\u201d', '&quot;', post.content[0].value) # right double quote
+  post.content[0].value = re.sub('[^\x00-\x7F]+', '', post.content[0].value) # strip out extended unicode characters
  
 # Write the data to a CSV 'feed_articles.csv'
 with open('feed-articles.csv', mode='a', newline='') as feed_articles:
